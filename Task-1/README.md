@@ -75,6 +75,9 @@ A System-on-Chip (SoC) is an integrated circuit (IC) that consolidates most or a
 - Voltage Regulators/Power Islands: Enable dynamic power scaling.
 - Critical for energy efficiency, especially in mobile/IoT SoCs.
 
+- <img width="563" height="352" alt="Screenshot 2025-10-03 122834" src="https://github.com/user-attachments/assets/b14a7124-3c86-44a2-94f7-44109e57e40d" />
+
+
 ---
 
 ### 🔹 Types of SoCs
@@ -143,6 +146,9 @@ The primary goal is to provide an understandable, lightweight platform to demons
 6. **Bus / Interconnect**
     - Simple bus connects CPU, memory, peripherals.
     - Teaches internal data communication basics.
+  
+    - <img width="1214" height="687" alt="Screenshot 2025-10-03 122919" src="https://github.com/user-attachments/assets/9db9f665-33ee-4ae4-860c-22762c7dbfcc" />
+
 
 ---
 
