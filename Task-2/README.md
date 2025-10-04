@@ -29,6 +29,58 @@ VSDBabySoC/
 └── output/
 └── compiled_tlv/         # Holds compiled intermediate files if needed
 ```
+### 🛠️ Cloning the Project
+
+To begin, clone the VSDBabySoC repository using the following command:
+
+```bash
+cd ~/VLSI
+
+git clone https://github.com/manili/VSDBabySoC.git
+
+cd ~/VLSI/VSDBabySoC/
+
+spatha@spatha-VirtualBox:~/VLSI$ ls VSDBabySoC/
+images  LICENSE  Makefile  README.md  src
+
+spatha@spatha-VirtualBox:~/VLSI$ ls VSDBabySoC/src/module/
+avsddac.v  avsdpll.v  clk_gate.v  pseudo_rand_gen.sv  pseudo_rand.sv  rvmyth_gen.v  rvmyth.tlv  rvmyth.v  testbench.rvmyth.post-routing.v  testbench.v  vsdbabysoc.v
+```
+### TLV to Verilog Conversion for RVMYTH
+
+Initially, you will see only the `rvmyth.tlv` file inside `src/module/`, since the RVMYTH core is written in TL-Verilog.
+
+To convert it into a `.v` file for simulation, follow the steps below:
+
+<strong>🔧 TLV to Verilog Conversion Steps</strong>
+
+```bash
+# Step 1: Install python3-venv (if not already installed)
+sudo apt update
+sudo apt install python3-venv python3-pip
+
+# Step 2: Create and activate a virtual environment
+cd ~/VLSI/VSDBabySoC/
+python3 -m venv sp_env
+source sp_env/bin/activate
+
+# Step 3: Install SandPiper-SaaS inside the virtual environment
+pip install pyyaml click sandpiper-saas
+
+# Step 4: Convert rvmyth.tlv to Verilog
+sandpiper-saas -i ./src/module/*.tlv -o rvmyth.v --bestsv --noline -p verilog --outdir ./src/module/
+```
+
+✅ After running the above command, rvmyth.v will be generated in the src/module/ directory.
+
+You can confirm this by listing the files:
+
+```bash
+spatha@spatha-VirtualBox:~$ cd VLSI/VSDBabySoC/
+spatha@spatha-VirtualBox:~/VLSI/VSDBabySoC$ ls src/module/
+avsddac.v  avsdpll.v  clk_gate.v  pseudo_rand_gen.sv  pseudo_rand.sv  rvmyth_gen.v  rvmyth.tlv  rvmyth.v  testbench.rvmyth.post-routing.v  testbench.v  vsdbabysoc.v
+```
+
 
 ### 🧩 Module Descriptions
 
@@ -67,8 +119,8 @@ The rvmyth module is a simple RISC-V based processor. It outputs a 10-bit digita
      4. `./a.out`
      5. `gtkwave tb_mythcore_test.vcd`
   
- 
-![image](https://user-images.githubusercontent.com/82170364/121876882-a6282700-cd27-11eb-9a3d-132172a2aac2.png)
+ <img width="1920" height="922" alt="rvmythcore wave" src="https://github.com/user-attachments/assets/0dac3357-3586-4dbc-b1ee-6f48e0b20460" />
+
 
 
  *10-bit digital codes observed at the output of rvmyth.*
@@ -99,29 +151,90 @@ The `testbench.v` file is a test module to verify the functionality of vsdbabyso
 - `pre_synth_sim.vcd` or `post_synth_sim.vcd` files generated based on simulation conditions.
 
 ---
+### Simulation Steps
 
-## 🏃 Simulation Steps
+#### <ins>Pre-Synthesis Simulation</ins>
 
-### 🔬 Pre-Synthesis Simulation
-Run:
-```tcl
-iverilog -o output/pre_synth_sim/pre_synth_sim.out -DPRE_SYNTH_SIM \
-    -I src/include -I src/module \
-    src/module/testbench.v src/module/vsdbabysoc.v
+Run the following command to perform a pre-synthesis simulation:
+
+```bash
+cd ~/VLSI/VSDBabySoC/
+
+mkdir -p output/pre_synth_sim
+
+iverilog -o ~/VLSI/VSDBabySoC/output/pre_synth_sim/pre_synth_sim.out -DPRE_SYNTH_SIM -I ~/VLSI/VSDBabySoC/src/include -I ~/VLSI/VSDBabySoC/src/module ~/VLSI/VSDBabySoC/src/module/testbench.v
+```
+
+Then run:
+```bash
 cd output/pre_synth_sim
+
 ./pre_synth_sim.out
 ```
-![WhatsApp Image 2024-11-05 at 18 21 53](https://github.com/user-attachments/assets/71e2f05c-1688-4016-adf2-3ae8a874b18a)
 
-**Explanation:**
-- `-DPRE_SYNTH_SIM` 📢: Defines the PRE_SYNTH_SIM macro for conditional compilation in the testbench.
-- The resulting `pre_synth_sim.vcd` file can be viewed in GTKWave 🌊.
+Explanation:
+
+- DPRE_SYNTH_SIM: Defines the PRE_SYNTH_SIM macro for conditional compilation in the testbench.
+- The resulting pre_synth_sim.vcd file can be viewed in GTKWave.
+
+#### Viewing Waveform in GTKWave
+
+After running the simulation, open the VCD file in GTKWave: 
+
+```bash
+
+cd ~/VLSI/VSDBabySoC/
+
+gtkwave output/pre_synth_sim/pre_synth_sim.vcd
+
+```
+Drag and drop the CLK, reset, OUT (DAC), and RV TO DAC [9:0] signals to their respective locations in the simulation tool
+
+ ![Alt Text](Images/today4.jpg)
+
+In this picture we can see the following signals:
+
+**CLK**: This is the input CLK signal of the RVMYTH core. This signal comes from the PLL, originally.
+
+**reset**: This is the input reset signal of the RVMYTH core. This signal comes from an external source, originally.
+
+**OUT**: This is the output OUT signal of the VSDBabySoC module. This signal comes from the DAC (due to simulation restrictions it behaves like a digital signal which is incorrect), originally.
+
+**RV_TO_DAC[9:0]**: This is the 10-bit output [9:0] OUT port of the RVMYTH core. This port comes from the RVMYTH register #17, originally.
+
+**OUT**: This is a real datatype wire which can simulate analog values. It is the output wire real OUT signal of the DAC module. This signal comes from the DAC, originally. 
+
+This can be viewed by changing the Data Format of the signal to Analog → Step
+
+#### Viewing DAC output in analog mode
+
+Drag and drop the CLK, reset, OUT (DAC) (as analog step), and RV TO DAC [9:0] signals to their respective locations in the simulation tool 
+
 
 ### 👀 Viewing Waveform in GTKWave
 After running the simulation, open the VCD file in GTKWave:
 ```
 gtkwave output/pre_synth_sim/pre_synth_sim.vcd
 ```
+<img width="1920" height="922" alt="week-2 gtk" src="https://github.com/user-attachments/assets/7291870e-3a80-48d9-a3a3-c7b81d415e14" />
+In this picture we can see the following signals:
+
+**CLK**: This is the input CLK signal of the RVMYTH core. This signal comes from the PLL, originally.
+
+**reset**: This is the input reset signal of the RVMYTH core. This signal comes from an external source, originally.
+
+**OUT**: This is the output OUT signal of the VSDBabySoC module. This signal comes from the DAC (due to simulation restrictions it behaves like a digital signal which is incorrect), originally.
+
+**RV_TO_DAC[9:0]**: This is the 10-bit output [9:0] OUT port of the RVMYTH core. This port comes from the RVMYTH register #17, originally.
+
+**OUT**: This is a real datatype wire which can simulate analog values. It is the output wire real OUT signal of the DAC module. This signal comes from the DAC, originally. 
+
+This can be viewed by changing the Data Format of the signal to Analog → Step
+
+#### Viewing DAC output in analog mode
+
+Drag and drop the CLK, reset, OUT (DAC) (as analog step), and RV TO DAC [9:0] signals to their respective locations in the simulation tool 
+
 
 ### 🏗️ Post-Synthesis Simulation
 To run a post-synthesis simulation, use:
