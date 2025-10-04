@@ -190,7 +190,8 @@ gtkwave output/pre_synth_sim/pre_synth_sim.vcd
 ```
 Drag and drop the CLK, reset, OUT (DAC), and RV TO DAC [9:0] signals to their respective locations in the simulation tool
 
- ![Alt Text](Images/today4.jpg)
+<img width="1920" height="922" alt="presynth" src="https://github.com/user-attachments/assets/0525ffdf-8344-4905-be7f-8148c545dc96" />
+
 
 In this picture we can see the following signals:
 
